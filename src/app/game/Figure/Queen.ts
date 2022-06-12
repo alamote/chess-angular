@@ -5,6 +5,6 @@ export default class Queen extends Figure {
 
   constructor(color: ColorEnum) {
     super(color);
-    this.figure = FigureEnum.QUEEN;
+    this.setFigure(FigureEnum.QUEEN);
   }
 }

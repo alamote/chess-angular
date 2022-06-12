@@ -1,14 +1,13 @@
 export const GameConfig = {
   colors: {
     highlight: '#995210',
-    black: '#ac6726',
-    white: '#fed9a3',
-    line: '#3d1605'
+    black: '#67595E',
+    white: '#EED6D3',
+    line: '#3a3234'
   },
-  lineWidth: 4,
+  line_width: 1,
   board: {
-    margin: 64,
-    padding: 32,
-    minSize: 400
+    padding: 0,
+    min_size: 400
   }
 }

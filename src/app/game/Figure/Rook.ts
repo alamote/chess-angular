@@ -5,6 +5,6 @@ export default class Rook extends Figure {
 
   constructor(color: ColorEnum) {
     super(color);
-    this.figure = FigureEnum.ROOK;
+    this.setFigure(FigureEnum.ROOK);
   }
 }

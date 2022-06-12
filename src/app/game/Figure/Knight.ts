@@ -5,6 +5,6 @@ export default class Knight extends Figure {
 
   constructor(color: ColorEnum) {
     super(color);
-    this.figure = FigureEnum.KNIGHT;
+    this.setFigure(FigureEnum.KNIGHT);
   }
 }

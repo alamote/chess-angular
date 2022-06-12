@@ -5,6 +5,6 @@ export default class Pawn extends Figure {
 
   constructor(color: ColorEnum) {
     super(color);
-    this.figure = FigureEnum.PAWN;
+    this.setFigure(FigureEnum.PAWN);
   }
 }

@@ -1,4 +1,5 @@
-import { AfterViewInit, Component, HostListener, OnInit } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
+
 import Board from '../../game/Board/Board';
 
 @Component({
@@ -6,27 +7,23 @@ import Board from '../../game/Board/Board';
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss']
 })
-export class GameComponent implements OnInit, AfterViewInit {
+export class GameComponent implements AfterViewInit {
 
-
-  board: Board;
+  board!: Board;
 
   constructor() {
-    this.board = new Board();
   }
 
-  @HostListener('window:resize', ['$event']) onResize() {
-    this.board.render();
+  onMouseLeave() {
+    this.board.onMouseLeave();
   }
 
   onMouseMove(event: MouseEvent) {
     this.board.onMouseMove(event);
   }
 
-  ngOnInit(): void {
-  }
-
   ngAfterViewInit(): void {
+    this.board = new Board();
     this.board.reset();
   }
 

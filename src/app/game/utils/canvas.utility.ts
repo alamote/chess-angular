@@ -1,4 +1,4 @@
-interface DrawOptions {
+export interface DrawOptions {
   stroke?: boolean;
   line_width?: number;
   line_color?: string;
@@ -6,9 +6,18 @@ interface DrawOptions {
   fill_color?: string;
   shadow_blur?: number;
   shadow_color?: string;
+  text_align?: CanvasTextAlign;
+  text_valign?: CanvasTextBaseline;
+  font?: string;
 }
 
 export class CanvasUtility {
+
+  public static circle(context: CanvasRenderingContext2D, x: number, y: number, radius: number, options: DrawOptions = {}) {
+    context.beginPath();
+    context.arc(x, y, radius, 0, 2 * Math.PI);
+    CanvasUtility.draw(context, options);
+  }
 
   public static rect(context: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, options: DrawOptions = {}) {
     context.beginPath();
@@ -31,6 +40,26 @@ export class CanvasUtility {
     CanvasUtility.draw(context, options);
   }
 
+  public static text(context: CanvasRenderingContext2D, text: string, x: number, y: number, options: DrawOptions = {}) {
+    if (options.line_width) {
+      context.lineWidth = 2;
+    }
+    if (options.text_align) {
+      context.textAlign = options.text_align;
+    }
+    if (options.text_valign) {
+      context.textBaseline = options.text_valign;
+    }
+    if (options.font) {
+      context.font = options.font;
+    }
+    if (options.line_color) {
+      context.strokeStyle = options.line_color;
+    }
+    context.strokeText(text, x, y);
+    CanvasUtility.reset(context);
+  }
+
   public static image(context: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, path: string, options: DrawOptions = {}, callback: () => void = () => null) {
     const figure = new Image(width, height);
     if (options.shadow_blur) {
@@ -45,6 +74,19 @@ export class CanvasUtility {
       callback();
     };
     figure.src = path;
+  }
+
+  public static toDataURL(src: string, callback: (dataURL: string) => void) {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+      canvas.height = img.naturalHeight;
+      canvas.width = img.naturalWidth;
+      ctx.drawImage(img, 0, 0);
+      callback(canvas.toDataURL());
+    };
+    img.src = src;
   }
 
   private static draw(context: CanvasRenderingContext2D, options: DrawOptions = {}) {
@@ -71,19 +113,6 @@ export class CanvasUtility {
       }
     }
     CanvasUtility.reset(context);
-  }
-
-  public static toDataURL(src: string, callback: (dataURL: string) => void) {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-      canvas.height = img.naturalHeight;
-      canvas.width = img.naturalWidth;
-      ctx.drawImage(img, 0, 0);
-      callback(canvas.toDataURL());
-    };
-    img.src = src;
   }
 
   private static reset(context: CanvasRenderingContext2D) {

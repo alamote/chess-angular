@@ -8,11 +8,17 @@ import Knight from '../Figure/Knight';
 import Bishop from '../Figure/Bishop';
 import King from '../Figure/King';
 import Queen from '../Figure/Queen';
-import { CanvasUtility } from '../utils/canvas.utility';
+import { CanvasUtility, DrawOptions } from '../utils/canvas.utility';
 import { GameUtility } from '../utils/game.utility';
-import { interval } from 'rxjs';
+import { Game } from '../Game/Game';
+
+interface BoardState {
+  size: number;
+}
 
 export default class Board {
+
+  game: Game;
 
   canvas!: HTMLCanvasElement;
   context!: CanvasRenderingContext2D;
@@ -23,18 +29,27 @@ export default class Board {
   cells: Cell[] = [];
   figures: Figure[] = [];
 
-  constructor() {
-    this.cells = Array(64).fill(null).map((_, i) => new Cell(Math.floor(i / 8), i % 8));
+  state!: BoardState;
+  prevState!: BoardState;
+
+  constructor(game: Game) {
+    this.game = game;
+    this.canvas = document.querySelector('canvas.board') as HTMLCanvasElement;
+    this.context = this.canvas.getContext('2d') as CanvasRenderingContext2D;
+    for (let row = 0; row < 8; row++) {
+      for (let column = 0; column < 8; column++) {
+        this.cells.push(new Cell(row, column, this.context, game));
+      }
+    }
   }
 
   setBoardSize() {
-    if (!this.initialized || this.size !== GameUtility.boardSize()) {
+    if (this.size !== GameUtility.boardSize()) {
       this.size = GameUtility.boardSize();
       this.cells.forEach(cell => cell.size = GameUtility.cellSize());
       if (this.canvas) {
         this.canvas.width = this.size;
         this.canvas.height = this.size;
-        this.initialized = true;
       }
     }
   }
@@ -48,6 +63,7 @@ export default class Board {
   }
 
   reset() {
+    this.setBoardSize();
     this.cells.forEach(cell => cell.figure = null);
     [0, 7].forEach(row => {
       const color = !row ? ColorEnum.WHITE : ColorEnum.BLACK;
@@ -65,58 +81,49 @@ export default class Board {
         this.getCell(row, column).figure = new Pawn(row === 1 ? ColorEnum.WHITE : ColorEnum.BLACK);
       }
     });
-
-    interval(1000 / 60).subscribe(this.render.bind(this));
+    this.render();
   }
 
-  render() {
-    if (!this.canvas) {
-      this.canvas = document.querySelector('canvas.board') as HTMLCanvasElement;
-      this.context = this.canvas.getContext('2d') as CanvasRenderingContext2D;
-      this.cells.forEach(cell => cell.context = this.context);
-    }
-    if (!this.context) {
-      throw new Error('Board: Canvas context is missing');
-    }
-    const prevSize = this.size;
-    this.setBoardSize();
-
-    if (prevSize !== this.size) {
-      CanvasUtility.rect(this.context, GameConfig.line_width / 2, GameConfig.line_width / 2, this.size - GameConfig.line_width, this.size - GameConfig.line_width, {
+  render(force: boolean = false) {
+    this.state = this.getState();
+    if (force || !this.prevState || JSON.stringify(this.state) !== JSON.stringify(this.prevState)) {
+      this.prevState = {...this.state};
+      CanvasUtility.rect(this.context, GameConfig.border_width / 2, GameConfig.border_width / 2, this.size - GameConfig.border_width, this.size - GameConfig.border_width, {
         stroke: true,
-        line_color: GameConfig.colors.line,
-        line_width: GameConfig.line_width,
+        line_color: GameConfig.colors.border,
+        line_width: GameConfig.border_width,
         fill: true,
         fill_color: GameConfig.colors.black
       });
 
-      // const cellSize = (this.size - GameConfig.board.padding * 2) / 8 - GameConfig.line_width * 4;
-      // for (let row = 1; row <= 8; row++) {
-      //   this.context.lineWidth = 2;
-      //   this.context.textAlign = 'center';
-      //   this.context.textBaseline = 'middle';
-      //   this.context.font = 'bold 24px Montserrat';
-      //   this.context.strokeStyle = GameConfig.colors.white;
-      //   this.context.strokeText(row.toString(), (row - 1) * cellSize + GameConfig.board.padding * 2 + cellSize / 2 + (row - 1) * GameConfig.line_width * 2 + GameConfig.line_width, GameConfig.board.padding);
-      //   this.context.strokeText(row.toString(), (row - 1) * cellSize + GameConfig.board.padding * 2 + cellSize / 2 + (row - 1) * GameConfig.line_width * 2 + GameConfig.line_width, this.size - GameConfig.board.padding);
-      //   this.context.strokeText(String.fromCharCode(64 + row), GameConfig.board.padding, Math.abs(row - 8) * cellSize + GameConfig.board.padding * 2 + cellSize / 2 + Math.abs(row - 8) * GameConfig.line_width * 2 + GameConfig.line_width);
-      //   this.context.strokeText(String.fromCharCode(64 + row), this.size - GameConfig.board.padding, Math.abs(row - 8) * cellSize + GameConfig.board.padding * 2 + cellSize / 2 + Math.abs(row - 8) * GameConfig.line_width * 2 + GameConfig.line_width);
-      // }
+      const cellSize = this.cells[0].size;
+      const textOptions: DrawOptions = {
+        line_width: 2,
+        text_align: 'center',
+        text_valign: 'middle',
+        font: '18px Arial',
+        line_color: GameConfig.colors.white,
+      };
+      for (let row = 1; row <= 8; row++) {
+        CanvasUtility.text(this.context, row.toString(), (row - 1) * cellSize + cellSize / 2 + GameConfig.board.padding + GameConfig.border_width * 1.15 * (row - 1) + 3, GameConfig.board.padding / 2 + 2, textOptions);
+        CanvasUtility.text(this.context, row.toString(), (row - 1) * cellSize + cellSize / 2 + GameConfig.board.padding + GameConfig.border_width * 1.15 * (row - 1) + 3, this.size - GameConfig.board.padding / 2 - 2, textOptions);
+        CanvasUtility.text(this.context, String.fromCharCode(64 + row), GameConfig.board.padding / 2, Math.abs(row - 8) * cellSize + cellSize / 2 + GameConfig.board.padding + GameConfig.border_width * 1.3 * Math.abs(row - 8), textOptions);
+        CanvasUtility.text(this.context, String.fromCharCode(64 + row), this.size - GameConfig.board.padding / 2, Math.abs(row - 8) * cellSize + cellSize / 2 + GameConfig.board.padding + GameConfig.border_width * 1.3 * Math.abs(row - 8), textOptions);
+      }
+
+      this.cells.forEach(cell => cell.render(true));
     }
+    this.cells.forEach(cell => {
+      cell.state.has_moves = this.game.activePlayer.color === cell.figure?.color && cell?.figure?.hasMoves(this.game, cell);
+      cell.render()
+    });
 
-    this.cells.forEach(cell => cell.render(prevSize !== this.size));
+    requestAnimationFrame(() => this.render());
   }
 
-  onMouseLeave() {
-    this.cells.forEach(cell => cell.isHighlighted = false);
-  }
-
-  onMouseMove(event: MouseEvent) {
-    this.cells.forEach(cell => cell.isHighlighted = false);
-    this.getCellByXAndY(event.offsetX, event.offsetY)?.highlight();
-  }
-
-  onClick(event: MouseEvent) {
-    this.getCellByXAndY(event.offsetX, event.offsetY)?.showMoves();
+  getState(): BoardState {
+    return {
+      size: GameUtility.boardSize()
+    }
   }
 }

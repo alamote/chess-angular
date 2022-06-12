@@ -1,1 +1,11 @@
-<canvas class="board" (mousemove)="onMouseMove($event)" (mouseleave)="onMouseLeave()"></canvas>
+<div class="game">
+  <canvas class="board"
+          [class.pointer]="showPointer"
+          (mousemove)="onMouseMove($event)"
+          (mouseleave)="onMouseLeave()"></canvas>
+<!--  <div class="log">-->
+<!--    <ng-container *ngIf="game?.log">-->
+<!--      <div class="log-item" *ngFor="let item of game.log.getMoves()">{{item}}</div>-->
+<!--    </ng-container>-->
+<!--  </div>-->
+</div>

@@ -13,9 +13,13 @@ export class GameUtility {
   }
 
   public static cellSize() {
-    const bSize = GameUtility.boardSize();
+    const bSize = GameUtility.boardSize() - GameConfig.board.padding * 2;
 
-    return bSize / 8 - GameConfig.line_width * 1.1;
+    return bSize / 8 - GameConfig.border_width * 1.15;
+  }
+
+  public static rowToLetter(row: number): string {
+    return String.fromCharCode(64 + row);
   }
 
 }

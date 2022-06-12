@@ -1,30 +1,53 @@
-import { AfterViewInit, Component } from '@angular/core';
-
-import Board from '../../game/Board/Board';
+import { AfterViewInit, Component, HostListener } from '@angular/core';
+import { Game } from '../../game/Game/Game';
 
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
-  styleUrls: ['./game.component.scss']
 })
 export class GameComponent implements AfterViewInit {
 
-  board!: Board;
+  game!: Game;
+
+  resizeTimer!: any;
+  showPointer: boolean = false;
 
   constructor() {
   }
 
+  @HostListener('window:resize', ['$event']) onResize() {
+    if (this.resizeTimer) {
+      clearTimeout(this.resizeTimer);
+    }
+    this.resizeTimer = setTimeout(() => {
+      if (this.game?.board) {
+        this.game.board.setBoardSize();
+        this.game.board.render(true);
+      }
+    }, 100);
+  }
+
+  onClick(event: MouseEvent) {
+    if (this.game) {
+      this.game.onClick(event);
+    }
+  }
+
   onMouseLeave() {
-    this.board.onMouseLeave();
+    if (this.game?.board) {
+      this.game.onMouseLeave();
+    }
   }
 
   onMouseMove(event: MouseEvent) {
-    this.board.onMouseMove(event);
+    if (this.game?.board) {
+      this.showPointer = this.game.onMouseMove(event);
+    }
   }
 
   ngAfterViewInit(): void {
-    this.board = new Board();
-    this.board.reset();
+    setTimeout(() => this.game = new Game());
+    document.addEventListener('click', this.onClick.bind(this));
   }
 
 

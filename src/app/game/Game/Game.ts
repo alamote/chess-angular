@@ -1,4 +1,4 @@
-import Player from '../Player/Cell';
+import Player from '../Player/Player';
 import { ColorEnum } from '../interfaces';
 import { Log } from './Log';
 import Cell from '../Board/Cell';

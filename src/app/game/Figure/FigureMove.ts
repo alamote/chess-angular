@@ -2,6 +2,7 @@ import { Game } from '../Game/Game';
 import Cell from '../Board/Cell';
 import Figure from './Figure';
 import { ColorEnum } from '../interfaces';
+import King from './King';
 
 export default class FigureMove {
 
@@ -22,6 +23,7 @@ export default class FigureMove {
     isVerticalPathEmpty: (game: Game, cell: Cell) => Array(Math.abs(this.row) - 1).fill(0).every((_, i) => !game.board.getCell(cell.row + (i + 1) * (this.row > 0 ? 1 : -1), cell.column)?.figure),
     isHorizontalPathEmpty: (game: Game, cell: Cell) => Array(Math.abs(this.column) - 1).fill(0).every((_, i) => !game.board.getCell(cell.row, cell.column + (i + 1) * (this.column > 0 ? 1 : -1))?.figure),
     isDiagonalPathEmpty: (game: Game, cell: Cell) => Array(Math.abs(this.row) - 1).fill(0).every((_, i) => !game.board.getCell(cell.row + (i + 1) * (this.row > 0 ? 1 : -1), cell.column + (i + 1) * (this.column > 0 ? 1 : -1))?.figure),
+    isNotKing: (game: Game, cell: Cell) => !(this.getTarget(game, cell)?.figure instanceof King),
   }
 
   constructor(row: number, column: number, conditions: string[] = [], defaults: boolean = true) {
@@ -34,6 +36,9 @@ export default class FigureMove {
       }
       if (!this.conditions.includes('isNotOwn')) {
         this.conditions.push('isNotOwn');
+      }
+      if (!this.conditions.includes('isNotKing')) {
+        this.conditions.push('isNotKing');
       }
     }
   }

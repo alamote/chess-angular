@@ -1,5 +1,5 @@
 import Cell from '../Board/Cell';
-import Player from '../Player/Cell';
+import Player from '../Player/Player';
 import Figure from '../Figure/Figure';
 
 export class Move {

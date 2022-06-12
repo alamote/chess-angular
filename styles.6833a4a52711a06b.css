@@ -1,0 +1,1 @@
+.game{display:flex}.game .board{box-shadow:0 0 50px #00000080}.game .board.pointer{cursor:pointer}.game .log{display:flex;flex-direction:column;margin-left:16px;width:300px}.game .log .log-item{margin-top:8px}body,html{padding:0;margin:0}body{background:#EED6D3;display:flex;align-items:center;justify-content:center;height:100vh;width:100vw}
